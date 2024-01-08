@@ -65,14 +65,10 @@ class TemplateLayoutPathResolver {
 
 		let useLayoutResolution = this.config.layoutResolution;
 
-		this.pathAlreadyHasExtension = this.dir + "/" + this.path;
-
-		if (this.path.split(".").length > 0 && fs.existsSync(this.pathAlreadyHasExtension)) {
-			this.filename = this.path;
-			this.fullPath = TemplatePath.addLeadingDotSlash(this.pathAlreadyHasExtension);
+		if (this.path.lastIndexOf(".").length > -1){
+			[this.filename, this.layoutPath, this.fullPath] = this.findFileNameAndPath([this.path]);
 		} else if (useLayoutResolution) {
-			this.filename = this.findFileName();
-			this.fullPath = TemplatePath.addLeadingDotSlash(this.dir + "/" + this.filename);
+			[this.filename, this.layoutPath, this.fullPath] = this.findFileNameAndPath(this.extensionMap.getFileList(this.path));
 		}
 	}
 
@@ -100,19 +96,24 @@ class TemplateLayoutPathResolver {
 		return this.fullPath;
 	}
 
-	findFileName() {
-		if (!fs.existsSync(this.dir)) {
-			throw Error(
-				"TemplateLayoutPathResolver directory does not exist for " + this.path + ": " + this.dir,
-			);
-		}
+	findFileNameAndPath(filenames){
+		for (let layoutPath of this.dir) {
+			// TODO it seems unnecessary/inefficient to check this here for every "this.path"
+			// It might be more efficient to test if the path exists once for each path in "EleventyFiles"
+			if (!fs.existsSync(layoutPath)) {
+				throw Error(
+					`TemplateLayoutPathResolver directory does not exist for ${this.path} + : ${layoutPath}`
+				);
+			}
 
-		for (let filename of this.extensionMap.getFileList(this.path)) {
-			// TODO async
-			if (fs.existsSync(this.dir + "/" + filename)) {
-				return filename;
+			for (let filename of filenames) {
+				// TODO async
+				if (fs.existsSync(layoutPath + "/" + filename)) {
+					return [filename, layoutPath, TemplatePath.addLeadingDotSlash(layoutPath + "/" + filename)];
+				}
 			}
 		}
+		return [null, null, null];
 	}
 
 	getLayoutsDir() {
@@ -120,17 +121,17 @@ class TemplateLayoutPathResolver {
 		if ("layouts" in this.config.dir) {
 			layoutsDir = this.config.dir.layouts;
 		} else if ("includes" in this.config.dir) {
-			layoutsDir = this.config.dir.includes;
+			layoutsDir = [this.config.dir.includes];
 		} else {
 			// Should this have a default?
-			layoutsDir = "_includes";
+			layoutsDir = ["_includes"];
 		}
 
-		return TemplatePath.join(this.inputDir, layoutsDir);
+		return layoutsDir.map(layout => TemplatePath.join(this.inputDir, layout));
 	}
 
 	getNormalizedLayoutKey() {
-		return TemplatePath.stripLeadingSubPath(this.fullPath, this.getLayoutsDir());
+		return TemplatePath.stripLeadingSubPath(this.fullPath, this.layoutPath);
 	}
 }
 

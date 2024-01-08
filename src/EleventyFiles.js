@@ -58,7 +58,11 @@ class EleventyFiles {
 		this.includesDir = TemplatePath.join(this.inputDir, this.config.dir.includes);
 
 		if ("layouts" in this.config.dir) {
-			this.layoutsDir = TemplatePath.join(this.inputDir, this.config.dir.layouts);
+			if(Array.isArray(this.config.dir.layouts)){
+			  this.layoutsDir = this.config.dir.layouts.map(layout => TemplatePath.join(this.inputDir, layout));
+			}else{
+			  this.layoutsDir = [TemplatePath.join(this.inputDir, this.config.dir.layouts)];
+			}
 		}
 	}
 
@@ -452,7 +456,7 @@ class EleventyFiles {
 		// we want this to fail on "" because we don’t want to ignore the
 		// entire input directory when using ""
 		if (this.config.dir.layouts) {
-			files = files.concat(TemplateGlob.map(this.layoutsDir + "/**"));
+			files = files.concat(...this.layoutsDir.map(layout => TemplateGlob.map(layout + "/**")));
 		}
 
 		if (this.config.dir.data && this.config.dir.data !== ".") {
