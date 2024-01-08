@@ -14,6 +14,7 @@ class TemplateEngine {
 		this.dirs = dirs;
 		this.inputDir = dirs.input;
 		this.includesDir = dirs.includes;
+		this.layoutsDir = dirs.layouts;
 
 		this.engineLib = null;
 		this.cacheable = false;
@@ -79,6 +80,10 @@ class TemplateEngine {
 
 	getIncludesDir() {
 		return this.includesDir;
+	}
+
+	getLayoutsDir() {
+	  return this.layoutsDir;
 	}
 
 	/**

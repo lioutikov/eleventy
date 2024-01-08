@@ -30,6 +30,13 @@ class TemplateRender {
 
 		this.inputDir = inputDir ? inputDir : this.config.dir.input;
 		this.includesDir = TemplatePath.join(this.inputDir, this.config.dir.includes);
+		if(!this.config.dir.layouts){
+		  this.layoutsDir = [];
+		}else if(Array.isArray(this.config.dir.layouts)){
+		  this.layoutsDir = this.config.dir.layouts.map(layout => TemplatePath.join(this.inputDir, layout));
+		}else{
+		  this.layoutsDir = [TemplatePath.join(this.inputDir, this.config.dir.layouts)];
+		}
 
 		this.parseMarkdownWith = this.config.markdownTemplateEngine;
 		this.parseHtmlWith = this.config.htmlTemplateEngine;
@@ -239,11 +246,16 @@ class TemplateRender {
 		return {
 			input: this.inputDir,
 			includes: this.includesDir,
+			layouts: this.layoutsDir,
 		};
 	}
 
 	getIncludesDir() {
 		return this.includesDir;
+	}
+
+	getLayoutsDir() {
+	  return this.layoutsDir;
 	}
 
 	isEngine(engine) {

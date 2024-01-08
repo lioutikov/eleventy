@@ -52,6 +52,7 @@ class UserConfig {
 
 		this.nunjucksEnvironmentOptions = {};
 		this.nunjucksPrecompiledTemplates = {};
+		this.nunjucksTemplateOptions = {};
 		this.nunjucksFilters = {};
 		this.nunjucksAsyncFilters = {};
 		this.nunjucksTags = {};
@@ -550,6 +551,11 @@ class UserConfig {
 		this.nunjucksPrecompiledTemplates = templates;
 	}
 
+	setNunjucksTemplateOptions(options) {
+		this.nunjucksTemplateOptions = options;
+	}
+
+
 	setEjsOptions() {
 		// no-op for backwards compat
 	}
@@ -883,6 +889,7 @@ class UserConfig {
 			liquidPairedShortcodes: this.liquidPairedShortcodes,
 			nunjucksEnvironmentOptions: this.nunjucksEnvironmentOptions,
 			nunjucksPrecompiledTemplates: this.nunjucksPrecompiledTemplates,
+			nunjucksTemplateOptions: this.nunjucksTemplateOptions,
 			nunjucksFilters: this.nunjucksFilters,
 			nunjucksAsyncFilters: this.nunjucksAsyncFilters,
 			nunjucksTags: this.nunjucksTags,

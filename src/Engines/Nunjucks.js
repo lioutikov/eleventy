@@ -12,6 +12,7 @@ class Nunjucks extends TemplateEngine {
 		this.nunjucksEnvironmentOptions = this.config.nunjucksEnvironmentOptions || {};
 
 		this.nunjucksPrecompiledTemplates = this.config.nunjucksPrecompiledTemplates || {};
+		this.nunjucksTemplateOptions = this.config.nunjucksTemplateOptions || {};
 		this._usingPrecompiled = Object.keys(this.nunjucksPrecompiledTemplates).length > 0;
 
 		this.setLibrary(this.config.libraryOverrides.njk);
@@ -44,10 +45,27 @@ class Nunjucks extends TemplateEngine {
 				this.nunjucksEnvironmentOptions,
 			);
 		} else {
-			let fsLoader = new NunjucksLib.FileSystemLoader([
-				super.getIncludesDir(),
-				TemplatePath.getWorkingDir(),
-			]);
+
+			let searchPaths = [];
+
+			if (this.nunjucksTemplateOptions.additionalPaths){
+				if(Array.isArray(this.nunjucksTemplateOptions.additionalPaths)){
+					searchPaths.push(...this.nunjucksTemplateOptions.additionalPaths);
+				}else{
+					searchPaths.push(this.nunjucksTemplateOptions.additionalPaths);
+				}
+			}
+			if (("searchInLayouts" in this.nunjucksTemplateOptions) && this.nunjucksTemplateOptions.searchInLayouts){
+				searchPaths.push(...super.getLayoutsDir());
+			}
+			if (!("searchInIncludes" in this.nunjucksTemplateOptions) || this.nunjucksTemplateOptions.searchInIncludes ){
+				searchPaths.push(super.getIncludesDir())
+			}
+			if (!("searchInWorkingDir" in this.nunjucksTemplateOptions) || this.nunjucksTemplateOptions.searchInWorkingDir){
+				searchPaths.push(TemplatePath.getWorkingDir())
+			}
+
+			let fsLoader = new NunjucksLib.FileSystemLoader(searchPaths);
 
 			this.njkEnv = new NunjucksLib.Environment(fsLoader, this.nunjucksEnvironmentOptions);
 		}
